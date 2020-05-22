@@ -1,14 +1,16 @@
 {
-    "name": "ModernAPIAndMicroservices",
+    "name": "modern_api_and_microservices",
     "version": "1.0.0",
     "description": "",
     "main": "index.js",
     "scripts": {
         "test": "echo \"Error: no test specified\" && exit 1",
-        "generate:dummy": "protoc -I=. ./protos/dummy.proto --js_out=import_style=commonjs,binary:./server --grpc_out=./server --plugin=protoc-gen-grpc=`which grpc_tools_node_protoc_plugin`"
+        "generate:dummy": "protoc -I=. ./protos/dummy.proto --js_out=import_style=commonjs,binary:./server --grpc_out=./server --plugin=protoc-gen-grpc=`which grpc_tools_node_protoc_plugin`",
+        "server": "cd server && nodemon index.js",
+        "client": "cd client && node client.js"
     },
     "keywords": [],
-    "author": "",
+    "author": "papandas",
     "license": "ISC",
     "dependencies": {
         "google-protobuf": "^3.12.0",
