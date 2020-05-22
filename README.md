@@ -19,10 +19,6 @@
 
 `npm install`
 
-# Generate protobuf package
-
-`npm run generate:dummy`
-
 # Run server
 
 `npm run server`
