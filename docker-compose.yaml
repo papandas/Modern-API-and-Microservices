@@ -5,6 +5,7 @@ services:
     build:
       context: ./server
       dockerfile: Dockerfile
+      
   grpc-client:
     container_name: grpc-client
     build:

@@ -4,10 +4,23 @@ const greetService = require('../server/protos/greet_grpc_pb');
 const calc = require('../server/protos/calculator_pb');
 const calcService = require('../server/protos/calculator_grpc_pb');
 
-const grps = require('grpc');
+const grpc = require('grpc');
+const path = require('path')
+const protoLoader = require('@grpc/proto-loader');
 
 const port = "127.0.0.1:50051";
-const creds = grps.ServerCredentials.createInsecure();
+const creds = grpc.ServerCredentials.createInsecure();
+
+// Dynamic loading Proto buf
+const greetProtoPath = path.join(__dirname, "..", "protos", "greet.proto")
+const greetProtoDefinition = protoLoader.loadSync(greetProtoPath, {
+    keepCase: true,
+    longs: String,
+    enums: String,
+    defaults: true,
+    oneofs: true
+})
+const greetPackageDefinition = grpc.loadPackageDefinition(greetProtoDefinition).greet;
 
 /**
  * Implementing Calculator method
@@ -21,6 +34,29 @@ function sum(call, callback) {
     sumResponse.setSumResult(call.request.getFirstNumber() + call.request.getSecondNumber())
 
     callback(null, sumResponse)
+}
+
+function primeNumberDecomposition(call, callback) {
+    var number = call.request.getPrimeNumber()
+    var divisor = 2
+
+    console.log("Server Number Request: ", number);
+
+    while (number > 1) {
+        if (number % divisor === 0) {
+            var primeNumberDecompositionResponse = new calc.PrimeNumberDecompositionResponse();
+            primeNumberDecompositionResponse.setPrimeFactor(divisor)
+
+            number = number / divisor
+
+            call.write(primeNumberDecompositionResponse)
+        } else {
+            divisor++
+            console.log('Divisor has increased to ', divisor);
+        }
+    }
+
+    call.end()
 }
 
 
@@ -40,12 +76,45 @@ function greetFunc(call, callback) {
     callback(null, greeting)
 }
 
+function dynamicGreetFunc(call, callback) {
+    let firstName = call.request.greeting.first_name;
+    let lastName = call.request.greeting.last_name;
+
+    console.log("Server Received: " + firstName + " " + lastName)
+
+    callback(null, { result: "Hello " + firstName + " " + lastName })
+}
+
+
+function greetManyTimes(call, callback) {
+    let firstName = call.request.getGreeting().getFirstName()
+    let lastName = call.request.getGreeting().getLastName()
+
+
+
+    let count = 0,
+        intervalId = setInterval(function() {
+            let greetManyTimeResponse = new greet.GreetManyTimesResponse()
+            greetManyTimeResponse.setResult(firstName, lastName)
+
+            // setup streaming
+
+            call.write(greetManyTimeResponse)
+
+            if (++count > 9) {
+                clearInterval(intervalId)
+                call.end()
+            }
+        }, 1000)
+}
+
 function main() {
-    var server = new grps.Server()
+    const server = new grpc.Server()
 
     // const serviceDefinition = greetService.GreetServiceService
-    //server.addService(greetService.GreetServiceService, { greet: greetFunc })
-    server.addService(calcService.CalculatorServiceService, { sum: sum })
+    server.addService(greetService.GreetServiceService, { greet: greetFunc, greetManyTimes: greetManyTimes })
+        //server.addService(greetPackageDefinition.GreetService.service, { greet: dynamicGreetFunc })
+    server.addService(calcService.CalculatorServiceService, { sum: sum, primeNumberDecomposition: primeNumberDecomposition })
 
     server.bind(port, creds)
     server.start()
