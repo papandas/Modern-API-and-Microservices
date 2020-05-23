@@ -3,21 +3,13 @@ syntax = "proto3";
 package calculator;
 
 service CalculatorService{
-    
+
     // Unary API
     rpc Sum (SumRequest) returns (SumResponse) {};
-
+    
     // Streaming API
     rpc PrimeNumberDecomposition (PrimeNumberDecompositionRequest) returns (stream PrimeNumberDecompositionResponse);
     
-}
-
-message PrimeNumberDecompositionRequest {
-    int32 prime_number = 1;
-}
-
-message PrimeNumberDecompositionResponse {
-    int32 prime_factor = 1;
 }
 
 message SumRequest{
@@ -27,6 +19,14 @@ message SumRequest{
 
 message SumResponse{
     int32 sum_result = 1;
+}
+
+message PrimeNumberDecompositionRequest {
+    int32 prime_number = 1;
+}
+
+message PrimeNumberDecompositionResponse {
+    int32 prime_factor = 1;
 }
 
 
