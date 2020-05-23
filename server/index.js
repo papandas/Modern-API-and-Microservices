@@ -6,7 +6,7 @@ const port = "127.0.0.1:50051";
 const creds = grpc.ServerCredentials.createInsecure();
 
 // Dynamic loading Proto buf
-const calcProtoPath = path.join(__dirname, "..", "protos", "calculator.proto")
+const calcProtoPath = path.join(__dirname, "protos", "calculator.proto")
 const calcProtoDefinition = protoLoader.loadSync(calcProtoPath, {
     keepCase: true,
     longs: String,

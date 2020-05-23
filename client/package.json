@@ -1,0 +1,17 @@
+{
+    "name": "modern_api_and_microservices",
+    "version": "1.0.0",
+    "description": "",
+    "main": "index.js",
+    "scripts": {
+        "start": "node client.js"
+    },
+    "keywords": [],
+    "author": "papandas",
+    "license": "ISC",
+    "dependencies": {
+        "@grpc/proto-loader": "^0.5.4",
+        "google-protobuf": "^3.12.0",
+        "grpc": "^1.24.2"
+    }
+}

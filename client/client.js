@@ -11,7 +11,7 @@ if (process.env.SERVER_ADDRESS) {
 const credentials = grpc.credentials.createInsecure();
 
 // Dynamic loading Proto buf
-const calcProtoPath = path.join(__dirname, "..", "protos", "calculator.proto")
+const calcProtoPath = path.join(__dirname, "protos", "calculator.proto")
 const calcProtoDefinition = protoLoader.loadSync(calcProtoPath, {
     keepCase: true,
     longs: String,

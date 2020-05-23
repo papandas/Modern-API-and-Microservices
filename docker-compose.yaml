@@ -15,3 +15,5 @@ services:
       - "3000:3000"
     environment:
       - SERVER_ADDRESS=grpc-server:50051
+    #depend_on:
+    #  - grpc-server
