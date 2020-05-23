@@ -5,22 +5,8 @@ const calc = require('../server/protos/calculator_pb');
 const calcService = require('../server/protos/calculator_grpc_pb');
 
 const grpc = require('grpc');
-const path = require('path')
-const protoLoader = require('@grpc/proto-loader');
-
 const port = "127.0.0.1:50051";
 const creds = grpc.ServerCredentials.createInsecure();
-
-// Dynamic loading Proto buf
-const greetProtoPath = path.join(__dirname, "..", "protos", "greet.proto")
-const greetProtoDefinition = protoLoader.loadSync(greetProtoPath, {
-    keepCase: true,
-    longs: String,
-    enums: String,
-    defaults: true,
-    oneofs: true
-})
-const greetPackageDefinition = grpc.loadPackageDefinition(greetProtoDefinition).greet;
 
 /**
  * Implementing Calculator method
@@ -59,6 +45,27 @@ function primeNumberDecomposition(call, callback) {
     call.end()
 }
 
+function computeAverage(call, callback) {
+    let count = 0,
+        total = 0;
+    call.on('data', request => {
+        ++count;
+        total = total + request.getStreamNumber()
+        console.log(count + ' Server: Steaming Number - ' + request.getStreamNumber() + ' Total - ' + total)
+    })
+
+    call.on('error', (error) => { console.error(error); })
+
+    call.on('end', () => {
+        var response = new calc.ComputeAverageResponse()
+        let re = parseInt(total) / parseInt(count)
+        console.log(typeof(total), total, "/", typeof(count), count, "=", typeof(re), re)
+        response.setAverageResult(re)
+
+        callback(null, response)
+    })
+}
+
 
 /**
  * Implement GRPC greet  method
@@ -90,8 +97,6 @@ function greetManyTimes(call, callback) {
     let firstName = call.request.getGreeting().getFirstName()
     let lastName = call.request.getGreeting().getLastName()
 
-
-
     let count = 0,
         intervalId = setInterval(function() {
             let greetManyTimeResponse = new greet.GreetManyTimesResponse()
@@ -108,13 +113,34 @@ function greetManyTimes(call, callback) {
         }, 1000)
 }
 
+
+function longGreet(call, callback) {
+    let count = 0;
+    call.on('data', request => {
+        var fullName = request.getGreeting().getFirstName() + " " + request.getGreeting().getLastName();
+
+        console.log('Hello ' + fullName)
+
+        ++count;
+    })
+
+    call.on('error', (error) => { console.error(error); })
+
+    call.on('end', () => {
+        var response = new greet.LongGreetResponse()
+        response.setResult(`Long greet: client streaming ${count} times....`)
+
+        callback(null, response)
+    })
+}
+
 function main() {
     const server = new grpc.Server()
 
     // const serviceDefinition = greetService.GreetServiceService
-    server.addService(greetService.GreetServiceService, { greet: greetFunc, greetManyTimes: greetManyTimes })
+    server.addService(greetService.GreetServiceService, { greet: greetFunc, greetManyTimes: greetManyTimes, longGreet: longGreet })
         //server.addService(greetPackageDefinition.GreetService.service, { greet: dynamicGreetFunc })
-    server.addService(calcService.CalculatorServiceService, { sum: sum, primeNumberDecomposition: primeNumberDecomposition })
+    server.addService(calcService.CalculatorServiceService, { sum: sum, primeNumberDecomposition: primeNumberDecomposition, computeAverage: computeAverage })
 
     server.bind(port, creds)
     server.start()
