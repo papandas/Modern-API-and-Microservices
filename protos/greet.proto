@@ -11,7 +11,10 @@ service GreetService{
     rpc GreetManyTimes (GreetManyTimesRequest) returns (stream GreetManyTimesResponse) {};
 
     // Client Streaming API
-    rpc LongGreet (stream LongGreetRequest) returns (LongGreetResponse);
+    rpc LongGreet (stream LongGreetRequest) returns (LongGreetResponse) {};
+
+    // Bi Directional Streaming API
+    rpc GreetEveryone (stream GreetEveryoneRequest) returns (stream GreetEveryoneResponse) {};
     
 }
 
@@ -45,4 +48,12 @@ message LongGreetResponse {
     string result = 1;
 }
 
+
+message GreetEveryoneRequest {
+    Greeting greeting = 1;
+}
+
+message GreetEveryoneResponse {
+    string result = 1;
+}
 

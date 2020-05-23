@@ -66,6 +66,42 @@ function computeAverage(call, callback) {
     })
 }
 
+function findMaximum(call, callback) {
+    let currentMaximum = 0,
+        currentNumber = 0;
+
+    call.on('data', request => {
+
+        currentNumber = request.getNumber()
+
+        console.log("Server Received: " + currentNumber)
+
+        if (currentNumber > currentMaximum) {
+            currentMaximum = currentNumber
+
+            var response = new calc.FindMaximumResponse()
+            response.setMaximum(currentMaximum)
+
+            call.write(response)
+
+            //callback(null, response)
+        }
+    })
+
+    call.on('error', (error) => { console.error(error); })
+
+    call.on('end', () => {
+        var response = new calc.FindMaximumResponse()
+        response.setMaximum(currentMaximum)
+
+        call.write(response)
+
+        call.end()
+
+        //callback(null, response)
+    })
+}
+
 
 /**
  * Implement GRPC greet  method
@@ -134,13 +170,57 @@ function longGreet(call, callback) {
     })
 }
 
+async function sleep(interval) {
+    return new Promise((resolve) => {
+        setTimeout(() => resolve(), interval)
+    })
+}
+
+async function greetEveryone(call, callback) {
+    call.on('data', request => {
+        var fullName = request.getGreeting().getFirstName() + " " + request.getGreeting().getLastName();
+
+        console.log('Hello ' + fullName)
+
+
+    })
+
+    call.on('error', (error) => { console.error(error); })
+
+    call.on('end', () => {
+        console.log('Server End!')
+    })
+
+    for (var i = 0; i < 10; i++) {
+        var request = new greet.GreetEveryoneResponse();
+        request.setResult(`ServerPapan${i} ServerDas${i}`)
+
+        call.write(request)
+
+        await sleep(1000)
+    }
+
+    call.end()
+}
+
 function main() {
     const server = new grpc.Server()
 
-    // const serviceDefinition = greetService.GreetServiceService
-    server.addService(greetService.GreetServiceService, { greet: greetFunc, greetManyTimes: greetManyTimes, longGreet: longGreet })
-        //server.addService(greetPackageDefinition.GreetService.service, { greet: dynamicGreetFunc })
-    server.addService(calcService.CalculatorServiceService, { sum: sum, primeNumberDecomposition: primeNumberDecomposition, computeAverage: computeAverage })
+    /*
+    server.addService(greetService.GreetServiceService, {
+        greet: greetFunc,
+        greetManyTimes: greetManyTimes,
+        longGreet: longGreet,
+        greetEveryone: greetEveryone
+    })
+    */
+
+    server.addService(calcService.CalculatorServiceService, {
+        sum: sum,
+        primeNumberDecomposition: primeNumberDecomposition,
+        computeAverage: computeAverage,
+        findMaximum: findMaximum
+    })
 
     server.bind(port, creds)
     server.start()

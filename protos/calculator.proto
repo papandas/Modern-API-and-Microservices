@@ -8,11 +8,22 @@ service CalculatorService{
     rpc Sum (SumRequest) returns (SumResponse) {};
 
     // Server Streaming API
-    rpc PrimeNumberDecomposition (PrimeNumberDecompositionRequest) returns (stream PrimeNumberDecompositionResponse);
+    rpc PrimeNumberDecomposition (PrimeNumberDecompositionRequest) returns (stream PrimeNumberDecompositionResponse) {};
 
     // Client Streaming API
-    rpc ComputeAverage (stream ComputeAverageRequest) returns (ComputeAverageResponse);
+    rpc ComputeAverage (stream ComputeAverageRequest) returns (ComputeAverageResponse) {};
+
+    //Bi Directional Streaming API
+    rpc FindMaximum (stream FindMaximumRequest) returns (stream FindMaximumResponse) {};
     
+}
+
+message FindMaximumRequest {
+    int32 number = 1;
+}
+
+message FindMaximumResponse {
+    int32 maximum = 1;
 }
 
 message ComputeAverageRequest{

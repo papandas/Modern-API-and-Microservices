@@ -112,6 +112,48 @@ function callLongGreet() {
     call.on('end', () => { console.log('Streaming Ended!'); })
 }
 
+async function sleep(interval) {
+    return new Promise((resolve) => {
+        setTimeout(() => resolve(), interval)
+    })
+}
+
+async function callGreetEveryone() {
+    var client = new greetService.GreetServiceClient(address, credentials)
+
+    var call = client.greetEveryone(request, (error, response) => {
+        if (!error) {
+            console.log("Greet Everyone Response: ", response.getResult());
+        } else {
+            console.error(error)
+        }
+    })
+
+    call.on('status', (status) => { console.log(status); })
+
+    call.on('data', (response) => { console.log('Client: Greet Everyone Response: ', response.getResult()); })
+
+    call.on('error', (error) => { console.error(error); })
+
+    call.on('end', () => { console.log('Client Ended!'); })
+
+    for (var i = 0; i < 10; i++) {
+        var greeting = new greet.Greeting();
+        greeting.setFirstName(`ClientPapan${i}`)
+        greeting.setLastName(`ClientDas${i}`)
+
+
+        var request = new greet.GreetEveryoneRequest();
+        request.setGreeting(greeting)
+
+        call.write(request)
+
+        await sleep(1500)
+    }
+
+    call.end()
+}
+
 function callSum() {
     var client = new calcService.CalculatorServiceClient(address, credentials)
 
@@ -187,6 +229,41 @@ function callComputeAverage() {
     call.on('end', () => { console.log('Servering Streaming Ended!'); })
 }
 
+async function callFindMaximum() {
+    var client = new calcService.CalculatorServiceClient(address, credentials)
+
+    var call = client.findMaximum(request, (error, response) => {
+        if (!error) {
+            console.log("Client: Compute Average Resonse: ", response.getMaximum());
+        } else {
+            console.error(error)
+        }
+    })
+
+    call.on('status', (status) => { console.log(status); })
+
+    call.on('data', (response) => { console.log('Client: Response: ', response.getMaximum()); })
+
+    call.on('error', (error) => { console.error(error); })
+
+    call.on('end', () => { console.log('Servering Streaming Ended!'); })
+
+    let data = [3, 4, 5, 13, 14, 15, 2, 3, 4, 23, 24, 25]
+
+    for (var i = 0; i < data.length; i++) {
+        var request = new calc.FindMaximumRequest()
+        request.setNumber(data[i])
+
+        console.log("Sending Number to Server", data[i])
+
+        call.write(request)
+
+        await sleep(2000)
+    }
+
+    call.end()
+}
+
 function main() {
     console.log('Hello from Client')
 
@@ -196,7 +273,9 @@ function main() {
     //callLongGreet()
     //callSum();
     //callPrimeNumberDecomposition()
-    callComputeAverage();
+    //callComputeAverage();
+    callFindMaximum();
+    //callGreetEveryone();
 
 
 }
