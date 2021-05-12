@@ -17,6 +17,6 @@
     "dependencies": {
         "@grpc/proto-loader": "^0.5.4",
         "google-protobuf": "^3.12.0",
-        "grpc": "^1.24.2"
+        "grpc": "^1.24.9"
     }
 }
